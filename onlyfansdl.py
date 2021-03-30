@@ -20,7 +20,7 @@ import datetime as dt
 
 # maximum number of posts to index
 # DONT CHANGE THAT
-POST_LIMIT = "300"
+POST_LIMIT = "100"
 
 # api info
 URL = "https://onlyfans.com"
@@ -71,11 +71,11 @@ def api_request(endpoint, getdata = None, postdata = None):
                         params=getparams).json()
             posts_num = len(list_base)
 
-            if posts_num >= 300:
-                beforePublishTime = list_base[299]['postedAtPrecise']
+            if posts_num >= 100:
+                beforePublishTime = list_base[99]['postedAtPrecise']
                 getparams['beforePublishTime'] = beforePublishTime
 
-                while posts_num == 300:
+                while posts_num == 100:
                     # Extract posts
                     list_extend = requests.get(URL + API_URL + endpoint,
                                     headers=API_HEADER,
@@ -88,7 +88,7 @@ def api_request(endpoint, getdata = None, postdata = None):
                     # Merge with previous posts
                     list_base.extend(list_extend)
 
-                    if posts_num < 300:
+                    if posts_num < 100:
                         break
             return list_base
         else:
