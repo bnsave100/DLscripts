@@ -8,6 +8,7 @@ import pathlib
 import requests
 import hashlib
 from datetime import datetime, timedelta
+requests.urllib3.disable_warnings()
 
 ######################
 # CONFIGURATIONS     #
@@ -109,7 +110,7 @@ def get_user_info(profile):
 		USER_ID = "0"
 		API_HEADER.pop('user-id', None)
 		print('\nUSER_ID auth failed, trying without it...\n(if this persists you can comment out the USER_ID variable)')
-		info = api_request("/users/" + profile, 'user-info').json()
+		info = api_request("/users/" + profile, 'user-info')
 		if "error" in info:
 			print("\nERROR: " + info["error"]["message"])
 			exit()
@@ -154,10 +155,18 @@ def download_media(media, subtype, album = False):
 	if not os.path.isdir(PROFILE + os.path.dirname(path)):
 		pathlib.Path(PROFILE + os.path.dirname(path)).mkdir(parents=True, exist_ok=True)
 	if not os.path.isfile(PROFILE + path):
-		print(PROFILE + path)
+		if MAX_AGE:
+			print(PROFILE + path)
 		global new_files
 		new_files += 1
-		r = requests.get(source, stream=True, timeout=(4,None))
+		try:
+			r = requests.get(source, stream=True, timeout=(4,None), verify=False)
+		except:
+			print('Error getting: ' + source + ' (skipping)')
+			return
+		if r.status_code != 200:
+			print(r.url + ' :: ' + str(r.status_code))
+			return
 		with open(PROFILE + path, 'wb') as f:
 			r.raw.decode_content = True
 			shutil.copyfileobj(r.raw, f)
@@ -230,3 +239,5 @@ if __name__ == "__main__":
 			get_content("messages", "/chats/" + PROFILE_ID + "/messages")
 		if PURCHASED:
 			get_content("purchased", "/posts/paid")
+
+
