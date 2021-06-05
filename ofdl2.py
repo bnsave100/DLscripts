@@ -84,16 +84,19 @@ def api_request(endpoint, apiType):
 	list_base = requests.get(API_URL + endpoint, headers=API_HEADER, params=getParams).json()
 
 	# Fixed the issue with the maximum limit of 100 posts by creating a kind of "pagination"
-	if len(list_base) >= posts_limit and apiType != 'user-info':
-		if apiType == 'purchased' or apiType == 'subscriptions':
+	if (len(list_base) >= posts_limit and apiType != 'user-info') or ('hasMore' in list_base and list_base['hasMore']):
+		if apiType == 'purchased' or apiType == 'subscriptions' or apiType == 'messages':
 			getParams['offset'] = str(posts_limit) #If the limit for purchased posts is lower than for posts, this won't work. But I can't test it
 		else:
 			getParams['afterPublishTime'] = list_base[len(list_base)-1]['postedAtPrecise']
 		while 1:
 			create_signed_headers(endpoint, getParams)
 			list_extend = requests.get(API_URL + endpoint, headers=API_HEADER, params=getParams).json()
-			list_base.extend(list_extend) # Merge with previous posts
-			if len(list_extend) < posts_limit:
+			if apiType == 'messages':
+				list_base['list'].extend(list_extend['list'])
+			else:
+				list_base.extend(list_extend) # Merge with previous posts
+			if (apiType == 'messages' and list_extend['hasMore'] == False) or len(list_extend) < posts_limit:
 				break
 			if apiType == 'purchased' or apiType == 'subscriptions':
 				getParams['offset'] = str(int(getParams['offset']) + posts_limit)
@@ -183,7 +186,7 @@ def get_content(MEDIATYPE, API_LOCATION):
 	if len(posts) > 0:
 		print("Found " + str(len(posts)) + " " + MEDIATYPE)
 		for post in posts:
-			if ("canViewMedia" in post and not post["canViewMedia"]):
+			if "media" not in post or ("canViewMedia" in post and not post["canViewMedia"]):
 				continue
 			if MEDIATYPE == "purchased" and ('fromUser' not in post or post["fromUser"]["username"] != PROFILE):
 				continue # Only get paid posts from PROFILE
@@ -239,5 +242,3 @@ if __name__ == "__main__":
 			get_content("messages", "/chats/" + PROFILE_ID + "/messages")
 		if PURCHASED:
 			get_content("purchased", "/posts/paid")
-
-
