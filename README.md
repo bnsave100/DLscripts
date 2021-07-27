@@ -2,6 +2,7 @@
 
 THE GREAT KORNHOLIO PRESENTS
 
-# OnlyFans Profile Downloader/Archiver
-This tool downloads all photos/videos from an OnlyFans profile, creating a local archive.
-You must be subscribed to the profile to download their content.
+# OnlyFans Profile Downloader/Archiver 
+CREDITS : @k0rnh0li0 for OG repo
+          @DIGITALCRIMINAL for everything 
+          @Voldrix for updates 
