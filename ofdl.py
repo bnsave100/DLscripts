@@ -16,7 +16,7 @@ requests.urllib3.disable_warnings()
 
 #Session Variables (update every time you login or your browser updates)
 USER_ID = ""
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0"
 X_BC = ""
 SESS_COOKIE = ""
 
@@ -26,7 +26,7 @@ USE_SUB_FOLDERS = False # use content type subfolders (messgaes/archived/stories
 
 # content types to download
 VIDEOS = True
-PHOTOS = True
+PHOTOS = False
 POSTS = True
 STORIES = True
 MESSAGES = True
@@ -46,12 +46,9 @@ API_HEADER = {
 	"app-token": "33d57ade8c02dbc5a333db99ff9ae26a",
 	"User-Agent": USER_AGENT,
 	"x-bc": X_BC,
-	"Cookie": "auh_id=0; sess=" + SESS_COOKIE
+	"user-id": USER_ID,
+	"Cookie": "auh_id=" + USER_ID + "; sess=" + SESS_COOKIE
 }
-if 'USER_ID' in globals() and USER_ID:
-	API_HEADER['user-id'] = USER_ID
-else:
-	USER_ID = "0"
 
 def create_signed_headers(link, queryParams):
 	global API_HEADER
@@ -73,7 +70,7 @@ def create_signed_headers(link, queryParams):
 
 def api_request(endpoint, apiType):
 	posts_limit = 100
-	getParams = { "app-token": "33d57ade8c02dbc5a333db99ff9ae26a", "limit": str(posts_limit), "order": "publish_date_asc"}
+	getParams = { "limit": str(posts_limit), "order": "publish_date_asc"}
 	if apiType == 'messages':
 		getParams['order'] = 'asc'
 	if apiType == 'subscriptions':
@@ -113,14 +110,8 @@ def get_user_info(profile):
 	# <profile> = "me" -> info about yourself
 	info = api_request("/users/" + profile, 'user-info')
 	if "error" in info:
-		global USER_ID, API_HEADER
-		USER_ID = "0"
-		API_HEADER.pop('user-id', None)
-		print('\nUSER_ID auth failed, trying without it...\n(if this persists you can comment out the USER_ID variable)')
-		info = api_request("/users/" + profile, 'user-info')
-		if "error" in info:
-			print("\nERROR: " + info["error"]["message"])
-			exit()
+		print("\nUSER_ID auth failed\n"+info["error"]["message"]+"\n\nUpdate your browser user-agent variable, then sign back in to OF and update your session variables.\nhttps://ipchicken.com/\n")
+		exit()
 	return info
 
 
@@ -209,8 +200,8 @@ def get_content(MEDIATYPE, API_LOCATION):
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
 		print("\nUsage: " + sys.argv[0] + " <list of profiles / all> [optional: only get last <integer> days of posts]\n")
-		print("Make sure to update the session variables at the top of this script\nSee readme for instructions")
-		print("Update User Agent: https://ipchicken.com/\n")
+		print("Make sure to update the session variables at the top of this script (See readme).\n")
+		print("Update Browser User Agent (Every time it updates): https://ipchicken.com/\n")
 		exit()
 	
 	#Get the rules for the signed headers dynamically, so we don't have to update the script every time they change
