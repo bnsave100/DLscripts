@@ -4,10 +4,10 @@ from gofile_downloader import GoFile
 
 
 global config
-config = __import__("json").load(open("config.json"))
+config = json.load(open("config.json"))
 
 
-def main(gofile_url: str):
+def main(gofile_url: str, password: str = ''):
     output = os.path.join('./', 'downloads/')
 
     if not os.path.exists(output):
@@ -22,11 +22,11 @@ def main(gofile_url: str):
         json.dump([], open(meta_output, 'a'))
 
     # Dumps out media links.
-    api = GoFile(config["API_KEY"])
+    api = GoFile()
 
     resources = json.load(open(meta_output))
     if len(resources) == 0:
-        resources = api.fetch_resources(gofile_url)
+        resources = api.fetch_resources(gofile_url, password)
         json.dump(resources, open(meta_output, "w+"))
 
     output = os.path.join(output, "files/")
@@ -38,4 +38,4 @@ def main(gofile_url: str):
 
 
 if __name__ == "__main__":
-    main(config["URL"])
+    main(config["URL"], config["PASSWORD"])
