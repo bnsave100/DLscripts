@@ -16,17 +16,17 @@ requests.urllib3.disable_warnings()
 
 #Session Variables (update every time you login or your browser updates)
 USER_ID = ""
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0"
+USER_AGENT = ""
 X_BC = ""
 SESS_COOKIE = ""
 
 #Options
-ALBUMS = False # Separate photos into subdirectories by post/album (Single photo posts are not put into subdirectories)
-USE_SUB_FOLDERS = False # use content type subfolders (messgaes/archived/stories/purchased), or download everything to /profile/photos and /profile/videos
+ALBUMS = True # Separate photos into subdirectories by post/album (Single photo posts are not put into subdirectories)
+USE_SUB_FOLDERS = True # use content type subfolders (messgaes/archived/stories/purchased), or download everything to /profile/photos and /profile/videos
 
 # content types to download
 VIDEOS = True
-PHOTOS = False
+PHOTOS = True
 POSTS = True
 STORIES = True
 MESSAGES = True
@@ -69,7 +69,7 @@ def create_signed_headers(link, queryParams):
 
 
 def api_request(endpoint, apiType):
-	posts_limit = 100
+	posts_limit = 50
 	getParams = { "limit": str(posts_limit), "order": "publish_date_asc"}
 	if apiType == 'messages':
 		getParams['order'] = 'asc'
